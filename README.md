@@ -9,6 +9,6 @@ We simulate Rayleigh-Taylor instabilities between two fluids based off varying i
  - The potential gradient of the simulation
 
 ## Course of Development:
-- Figure out math and stuff, figure out what equations are unnecessary, figure out if lagrangian or eulerian is better
-- Create a numbers-based program and make sure key metrics are within appropriate range of error
-- Make pretty visuals
+- [ ] Figure out math and stuff, figure out what equations are unnecessary, figure out if lagrangian or eulerian is better
+- [ ] Create a numbers-based program and make sure key metrics are within appropriate range of error
+- [ ]Make pretty visuals
