@@ -30,7 +30,7 @@ def reinitialize_phi(phi, dx, dy, tau=0.1, iterations=50):
         phi += tau * sign_phi * (1 - grad_phi)
     return phi
 
-def heaviside(phi, epsilon=1e-6):
+def heaviside(phi, epsilon=1e-3):
     """
     Regularized Heaviside step function:
     Smooth transition near phi = 0 to improve numerical stability.
