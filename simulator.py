@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from matplotlib.animation import FuncAnimation
+# from IPython.display import HTML
 
 # Setting up the grid
 Lx, Ly = 3.0, 1.0  # domain size
@@ -155,3 +156,5 @@ plt.title("Initial Density and Level Set Field")
 plt.xlabel("x")
 plt.ylabel("y")
 plt.show()
+
+# HTML(ani.to_jshtml())
