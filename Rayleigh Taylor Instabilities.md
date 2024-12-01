@@ -56,22 +56,23 @@ $$\frac{{\partial \phi}}{\partial t}+\vec{v}\cdot \nabla \phi=0$$
 
 1. **Initialize Fields**
 	1. **Grid**: Create a uniform 2d grid $(x,y)$.
-	2. **Density Field**: Use a smooth transition for initial $\rho(x,y)$ you could also use heaviside if you wanted to. $$\rho(x,y,0)=\rho_{light}+(\rho_{heavy}-\rho_{light}) \frac{1}{2}\left( 1+\tanh\left( y-\frac{y_{\text{interface}}}{\delta} \right) \right)$$
+	2. **Density Field**: Use a smooth transition for initial $\rho(x,y)$ you could also use heaviside if you wanted to.
+$$\rho(x,y,0)=\rho_{light}+(\rho_{heavy}-\rho_{light}) \frac{1}{2}\left( 1+\tanh\left( y-\frac{y_{\text{interface}}}{\delta} \right) \right)$$
 	3. **Level Set Field**: Initialize $\phi(x,y)$: $$\phi(x,y)=y-y_{\text{interface}}$$
 2. **Time Evolution Loop**
-	1. **Advection of**  $\phi$: $$\phi_{i,j}^{n+1}=\phi^{n}_{i,j}-\Delta t\left( u_{i,j} \frac{{\partial \phi}}{\partial x}+v_{i,j} \frac{{\partial \phi}}{\partial y} \right)$$
-		- Use Eulerian time stepping
-	2. **Reinitialize** $\phi$
+	1. **Advection of** $\phi$: $$\phi_{i,j}^{n+1}=\phi^{n}_{i,j}-\Delta t\left( u_{i,j} \frac{{\partial \phi}}{\partial x}+v_{i,j} \frac{{\partial \phi}}{\partial y} \right)$$
+  		- Use Eulerian time stepping
+	3. **Reinitialize** $\phi$
 		- Solve the reinitialization iteratively to maintain $\phi$ as a signed distance function: $$\frac{{\partial \phi}}{\partial \tau} = sign(\phi_{0})(1-|\nabla \phi|)$$
-	3. **Density Update**:  
+	4. **Density Update**:  
 		- Recompute $\rho$ using $H(\phi)$
-	4. **Vorticity Update**:
+	5. **Vorticity Update**:
 		- Evolve $\omega$ using the vorticity equation
-	5. **Solve Poisson Equation**: 
+	6. **Solve Poisson Equation**: 
 		- Use numerical solvers (e.g. Successive Over-Relaxation or Conjugate Gradient) to compute $\psi$ from $\nabla^{2}\psi=-\omega$
-	6. **Update Velocities**
+	7. **Update Velocities**
 		- Compute $u$ and $v$ from $\psi$
-	7. **Visualization**:
+	8. **Visualization**:
 		- Plot:
 			- The zero-contour of $\phi$ (the interface)
 			- Vorticity or density fields perhaps as background color maps
