@@ -4,27 +4,30 @@ import matplotlib.animation as animation
 from IPython.display import HTML
 
 # Domain setup
-Lx, Ly = 1.0, 3.0  # domain dimensions
-Nx, Ny = 20, 60  # grid resolution
+Lx, Ly = 1.0, 3.0  # Domain dimensions
+Nx, Ny = 10, 30  # Grid resolution
 dx, dy = Lx / Nx, Ly / Ny
 x = np.linspace(0, Lx, Nx)
 y = np.linspace(0, Ly, Ny)
 X, Y = np.meshgrid(x, y)
 
+
 # Physical parameters
-rho_light, rho_heavy = 1, 10.0  # densities
-delta = 0.01  # interface thickness
-nu = 0.01  # viscosity
-g = 9.8  # gravitational acceleration
-dt = 10e-8  # time step
+rho_light, rho_heavy = 1.0, 3.0  # Fluid densities
+delta = 0.01  # Interface thickness
+nu = 0.01  # Viscosity
+g = 9.8  # Gravitational acceleration
+dt = 0.00001  # Time step
+T = 0.001 # Total simulation time
+frames = int(T / dt) # number of frames
 
 # Initial conditions
-y_interface = Ly / 2  # interface position
-phi = Y - y_interface + 0.05 * np.cos(2 * np.pi * X / Lx)  # perturbed interface
+y_interface = Ly / 2  # Interface position
+phi = Y - y_interface + 0.05 * np.sin(2 * np.pi * X / Lx)  # Perturbed interface
 rho = rho_light + (rho_heavy - rho_light) * 0.5 * (1 + np.tanh((Y - y_interface) / delta))
-u = np.zeros_like(X)  # horizontal velocity
-v = np.zeros_like(Y)  # vertical velocity
-omega = np.zeros_like(X)  # vorticity
+u = np.zeros_like(X)  # Horizontal velocity
+v = np.zeros_like(Y)  # Vertical velocity
+omega = np.zeros_like(X)  # Vorticity
 
 # Helper functions
 def advect_phi(phi, u, v, dx, dy, dt):
@@ -64,9 +67,10 @@ def update_vorticity(omega, u, v, rho, dx, dy, nu, g, dt):
     baroclinic = g * d_rho_dx / np.maximum(rho, 1e-6)
 
     omega_new = omega + dt * (-advection + diffusion + baroclinic)
+    omega_new[0, :] = omega_new[-1, :] = omega_new[:, 0] = omega_new[:, -1] = 0  # Reset at boundaries
     return omega_new
 
-def solve_poisson_sor(omega, dx, dy, tol=1e-3, max_iter=5000, omega_relax=1.5):
+def solve_poisson_sor(omega, dx, dy, tol=1e-2, max_iter=5000, omega_relax=1.5):
     psi = np.zeros_like(omega)
     for _ in range(max_iter):
         psi_old = psi.copy()
@@ -76,7 +80,7 @@ def solve_poisson_sor(omega, dx, dy, tol=1e-3, max_iter=5000, omega_relax=1.5):
                     (psi[i+1, j] + psi[i-1, j]) / dx**2 +
                     (psi[i, j+1] + psi[i, j-1]) / dy**2 - omega[i, j]
                 )
-        psi[0, :] = psi[-1, :] = psi[:, 0] = psi[:, -1] = 0
+        psi[0, :] = psi[-1, :] = psi[:, 0] = psi[:, -1] = 0  # Boundary conditions
         if np.linalg.norm(psi - psi_old, ord=np.inf) < tol:
             break
     return psi
@@ -100,20 +104,21 @@ def update(frame):
     phi = reinitialize_phi(phi, dx, dy, tau=0.1, iterations=10)
     rho = update_density(phi, rho_light, rho_heavy)
     omega = update_vorticity(omega, u, v, rho, dx, dy, nu, g, dt)
-    psi = solve_poisson_sor(omega, dx, dy)
+    psi = solve_poisson_sor(omega, dx, dy, tol=1e-2)
     u, v = update_velocities(psi, dx, dy)
 
     ax.clear()
     ax.imshow(rho, extent=(0, Lx, 0, Ly), origin='lower', cmap='coolwarm', alpha=0.7)
     ax.contour(X, Y, phi, levels=[0], colors='black', linewidths=2)
-    ax.set_title(f"Time: {frame * dt:.2f} seconds")
+    ax.quiver(X[::4, ::4], Y[::4, ::4], u[::4, ::4], v[::4, ::4], scale=10, color='white')
+    ax.set_title(f"Time: {frame * dt:.4f} seconds")
     ax.set_xlabel("x")
     ax.set_ylabel("y")
 
     return []
 
 # Animation
-anim = animation.FuncAnimation(fig, update, frames=10, interval=50, init_func=init, blit=False)
+anim = animation.FuncAnimation(fig, update, frames=frames, interval=1, init_func=init, blit=False)
 
 # Display animation
 HTML(anim.to_jshtml())
